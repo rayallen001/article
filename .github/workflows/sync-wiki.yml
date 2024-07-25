@@ -1,0 +1,27 @@
+name: Sync Markdown to Wiki
+
+on:
+  push:
+    branches:
+      - main 
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout source code
+      uses: actions/checkout@v2
+
+    - name: Sync to Wiki
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        git config --global user.name "rayallen001"
+        git config --global user.email "yangzhou3932541@126.com"
+        git clone https://github.com/rayallen001/article.wiki.git wiki
+        cp -rf ./ wiki/
+        cd wiki
+        git add .
+        git commit -m "Sync from main branch"
+        git push origin master
