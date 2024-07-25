@@ -1,28 +1,41 @@
-name: Sync Markdown to Wiki
+name: Sync Wiki
 
 on:
   push:
     branches:
-      - main 
+      - main
+    paths: [wiki/**, .github/workflows/sync-wiki.yml]
+
+concurrency:
+  group: wiki
+  cancel-in-progress: true
+
+permissions:
+  contents: write
 
 jobs:
-  build:
+  wiki:
+    name: Publish to GitHub Wiki
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout source code
-      uses: actions/checkout@v2
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          repository: ${{github.repository}}
+          path: ${{github.repository}}
 
-    - name: Sync to Wiki
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        git config --global user.name yangzhou
-        git config --global user.email yangzhou3932541@126.com
-        git clone https://github.com/rayallen001/article.wiki.git wiki
-        pwd
-        cp -rf README.md wiki/
-        cd wiki
-        git add .
-        git commit -m "Sync from main branch"
-        git push origin master
+      - name: Checkout Wiki
+        uses: actions/checkout@v4
+        with:
+          repository: ${{github.repository}}.wiki
+          path: ${{github.repository}}.wiki
+
+      - name: Push to wiki
+        run: |
+          set -e
+          cd $GITHUB_WORKSPACE/${{github.repository}}.wiki
+          cp -r $GITHUB_WORKSPACE/${{github.repository}}/wiki/* .
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          git diff-index --quiet HEAD || git commit -m "action: wiki sync" && git push
