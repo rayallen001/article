@@ -21,7 +21,7 @@ jobs:
         git config --global user.email "yangzhou3932541@126.com"
         git clone https://github.com/rayallen001/article.wiki.git wiki
         pwd
-        cp -rf ./* wiki/
+        cp -rf README.md wiki/
         cd wiki
         git add .
         git commit -m "Sync from main branch"
